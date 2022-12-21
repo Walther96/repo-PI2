@@ -1,8 +1,7 @@
 package com.proyecto.rutas.model.Entity;
 
-import java.util.List;
+import java.util.Date;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -11,14 +10,15 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.validation.constraints.Size;
 
-import org.hibernate.annotations.Where;
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.proyecto.rutas.model.generic.GenericEntity;
+import com.proyecto.rutas.model.security.Usuario;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -30,34 +30,24 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-@Entity(name="Ruta")
-@Table(name="RUTA")
+@Entity(name="GrupoInspectoresDetalle")
+@Table(name="GRUPOINSPECTORESDETALLE")
 @Builder
-public class RutaEntity extends GenericEntity {
+public class GrupoInspectoresDetalleEntity extends GenericEntity {
 	
 	@Id
-	@Column(name="ID_RUTA")
+	@Column(name="ID_DETALLE_GRUPOINSPECTORES")
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Builder.Default
 	private Long id = 0L;
-	
-	@Size(min=5, max=100, message="El nombre de ruta es requerido y debe ser mayor que 5 y máximo 100 caracteres")
-	@Column(name="NOMBRE_RUTA",  length = 100, nullable= false, unique=true)
-	private String nombreruta;
-	
-	@ManyToOne
-	@JoinColumn(name="ID_ORIGEN", nullable=false)
-	private OrigenEntity origen;
-	
-	@ManyToOne
-	@JoinColumn(name="ID_DESTINO", nullable=false)
-	private DestinoEntity destino;
-	
-	@ManyToOne
-	@JoinColumn(name="ID_GRUPOINSPECTORES", nullable=false)
-	private GrupoInspectoresEntity grupoInspectores;
 
-	@OneToMany(mappedBy="ruta",fetch=FetchType.LAZY,cascade=CascadeType.ALL)
-	@Where(clause = "estado='1'")
-    private List<DetalleRuta> detalleruta;
+	@ManyToOne
+	@JoinColumn(name="ID_USUARIO", nullable=false)
+	private Usuario usuario;
+	
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(name="ID_GRUPOINSPECTORES", nullable=false)
+	@JsonIgnore // Redundancia cíclica
+	private GrupoInspectoresEntity grupoInspectores; //Uno
+
 }

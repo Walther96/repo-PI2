@@ -16,4 +16,6 @@ public interface VehiculoRepository extends JpaRepository<VehiculoEntity, Long> 
 	List<VehiculoEntity> findAllVehiculo();
 
 
+	@Query("select t from Vehiculo t where t.placa=:placa")
+	VehiculoEntity FindXPlaca(@Param("placa") String placa);
 }

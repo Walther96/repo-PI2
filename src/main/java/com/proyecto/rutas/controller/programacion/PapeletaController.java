@@ -1,10 +1,12 @@
 package com.proyecto.rutas.controller.programacion;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -20,75 +22,93 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.proyecto.rutas.controller.commons.ResponseREST;
 import com.proyecto.rutas.controller.generic.GenericController;
-import com.proyecto.rutas.model.Entity.DestinoEntity;
-import com.proyecto.rutas.model.security.Usuario;
+import com.proyecto.rutas.model.Entity.PapeletaEntity;
+import com.proyecto.rutas.model.Entity.PapeletaRequest;
 import com.proyecto.rutas.services.Exception.ServiceException;
-import com.proyecto.rutas.services.programacion.inf.DestinoService;
-import com.proyecto.rutas.services.programacion.inf.UsuarioService;
+import com.proyecto.rutas.services.programacion.inf.PapeletaService;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestController
-@RequestMapping("/usuario/v1")
+@RequestMapping("/papeleta/v1")
 @CrossOrigin(origins = "*", methods = { RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE })
-public class UsuarioController extends GenericController {
-	
+public class PapeletaController extends GenericController{
+
 	@Autowired
-	private UsuarioService usuarioService;
-	
-	@Autowired
-	private PasswordEncoder passwordEncoder;
+	private PapeletaService papeletaService;
 	
 	@GetMapping
-	public  ResponseEntity<ResponseREST> getUsuarios() throws ServiceException {
-		List<Usuario> lst=this.usuarioService.findAllUsuarios();
-		if (lst.isEmpty()) {
-			return super.getNotFoundRequest();
+	public  ResponseEntity<ResponseREST> getPapeletas() {
+		try {
+			List<PapeletaEntity> lst=this.papeletaService.getAll();
+			if (lst.isEmpty()) {
+				return super.getNotFoundRequest();
+			}
+			return super.getOKConsultaRequest(lst);
+		} catch (ServiceException e) {
+			log.error(e.getMessage());
+			return super.getErrorRequest();
 		}
-		return super.getOKConsultaRequest(lst);
 	}
-	
+
 	@GetMapping("/{id}")
-	public  ResponseEntity<ResponseREST> getUsuario(@PathVariable Long id) {
+	public  ResponseEntity<ResponseREST> getPapeleta(@PathVariable Long id) {
 		try {
 			if (id<=0) {
 				return super.getBadIdRequest();
 			}
-			Usuario usuario=this.usuarioService.findById(id);
-			if (usuario==null) {
+			PapeletaEntity papeleta=this.papeletaService.findById(id);
+			if (papeleta==null) {
 				return super.getNotFoundRequest();
 			}
-			return super.getOKConsultaRequest(usuario);
+			return super.getOKConsultaRequest(papeleta);
 		} catch (ServiceException e) {
 			log.error(e.getMessage());
 			return super.getErrorRequest();
 		}
 	}
 	
-	@GetMapping("/findByUser/{user}")
-	public  ResponseEntity<ResponseREST> getUsuario(@PathVariable String user) {
-		if (user.isEmpty()) {
-			return super.getBadIdRequest();
+	@GetMapping("/{desde}/{hasta}")
+	public ResponseEntity<ResponseREST> findByFechacreacion(@PathVariable @DateTimeFormat(pattern = "yyyyMMdd") Date desde,
+			@PathVariable @DateTimeFormat(pattern = "yyyyMMdd") Date hasta) {
+
+		
+		try {
+			Calendar cal = Calendar.getInstance();
+			cal.setTime(desde);
+			cal.set(Calendar.HOUR_OF_DAY, 0);
+
+			Date vdesde = cal.getTime();
+
+			cal.setTime(hasta);
+			cal.set(Calendar.HOUR_OF_DAY, 24);
+			Date vhasta = cal.getTime();
+			
+			List<PapeletaEntity> lst=this.papeletaService.findByFecha(vdesde, vhasta);
+			if (lst.isEmpty()) {
+				return super.getNotFoundRequest();
+			}
+			return super.getOKConsultaRequest(lst);
+		} catch (ServiceException e) {
+			log.error(e.getMessage());
+			return super.getErrorRequest();
 		}
-		Usuario usuario=this.usuarioService.findByUsername(user);
-		if (usuario==null) {
-			return super.getNotFoundRequest();
-		}
-		return super.getOKConsultaRequest(usuario);
+		
+		
+
 	}
 
+	
 	@PostMapping
-	public ResponseEntity<ResponseREST> insertar( @Validated @RequestBody Usuario usuario, BindingResult result) {
+	public ResponseEntity<ResponseREST> insertar( @Validated @RequestBody PapeletaRequest papeleta, BindingResult result) {
 		if (result.hasErrors()) {
 			return super.getBadRequest(result);
 		}
 		try {
-			usuario.setClave(passwordEncoder.encode(usuario.getClave()));
-
-			Usuario oUsuario=usuarioService.save(usuario);
-			if (oUsuario!=null) {
-				return super.getCreatedRequest(oUsuario);
+			PapeletaEntity oPapeleta=papeletaService.savePapeleta(papeleta);
+			if (oPapeleta!=null) {
+				return super.getCreatedRequest(oPapeleta);
 			}
 			return super.getErrorRequest();
 		} catch (ServiceException e) {
@@ -96,23 +116,22 @@ public class UsuarioController extends GenericController {
 			return super.getErrorRequest();
 		}
 	}
-	
+
 	@PutMapping	("/{id}")
-	public ResponseEntity<ResponseREST> actualizar(@PathVariable Long id,@Validated @RequestBody Usuario usuario,
+	public ResponseEntity<ResponseREST> actualizar(@PathVariable Long id,@Validated @RequestBody PapeletaEntity papeleta,
 			BindingResult result) {
 		if (id<=0) {
 			return super.getBadIdRequest();
 		}
-		usuario.setId(id);
-		usuario.setClave(passwordEncoder.encode(usuario.getClave()));
-
+		papeleta.setId(id);
+		
 		if (result.hasErrors()) {
 			return super.getBadRequest(result);
 		}
 		try {
-			Usuario oUsuario=usuarioService.save(usuario);
-			if (oUsuario!=null) {
-				return super.getOKRegistroRequest(oUsuario);
+			PapeletaEntity oPapeleta=papeletaService.save(papeleta);
+			if (oPapeleta!=null) {
+				return super.getOKRegistroRequest(oPapeleta);
 			}
 			return super.getErrorRequest();
 		} catch (ServiceException e) {
@@ -127,9 +146,9 @@ public class UsuarioController extends GenericController {
 			return ResponseEntity.badRequest().build();
 		}
 		try {
-			Usuario oUsuario=usuarioService.delete(id);
-			if (oUsuario!=null) {
-				return super.getOKRegistroRequest(oUsuario);
+			PapeletaEntity oPapeleta=papeletaService.delete(id);
+			if (oPapeleta!=null) {
+				return super.getOKRegistroRequest(oPapeleta);
 			}
 			return super.getErrorRequest();
 		} catch (ServiceException e) {
@@ -137,7 +156,4 @@ public class UsuarioController extends GenericController {
 			return super.getErrorRequest();
 		}
 	}
-
-	
-	
 }

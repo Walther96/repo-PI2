@@ -38,4 +38,7 @@ public class Menu extends GenericEntity{
 	
 	@Column(name="NOMBRE")
 	private String nombre;
+	
+	@Column(name="PATH")
+	private String path;
 }

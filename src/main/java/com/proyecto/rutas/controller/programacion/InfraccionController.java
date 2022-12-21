@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -20,75 +19,64 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.proyecto.rutas.controller.commons.ResponseREST;
 import com.proyecto.rutas.controller.generic.GenericController;
-import com.proyecto.rutas.model.Entity.DestinoEntity;
-import com.proyecto.rutas.model.security.Usuario;
+import com.proyecto.rutas.model.Entity.InfraccionEntity;
 import com.proyecto.rutas.services.Exception.ServiceException;
-import com.proyecto.rutas.services.programacion.inf.DestinoService;
-import com.proyecto.rutas.services.programacion.inf.UsuarioService;
+import com.proyecto.rutas.services.programacion.inf.InfraccionService;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestController
-@RequestMapping("/usuario/v1")
+@RequestMapping("/infraccion/v1")
 @CrossOrigin(origins = "*", methods = { RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE })
-public class UsuarioController extends GenericController {
-	
+public class InfraccionController extends GenericController{
+
 	@Autowired
-	private UsuarioService usuarioService;
-	
-	@Autowired
-	private PasswordEncoder passwordEncoder;
+	private InfraccionService infraccionService;
 	
 	@GetMapping
-	public  ResponseEntity<ResponseREST> getUsuarios() throws ServiceException {
-		List<Usuario> lst=this.usuarioService.findAllUsuarios();
-		if (lst.isEmpty()) {
-			return super.getNotFoundRequest();
+	public  ResponseEntity<ResponseREST> getInfracciones() {
+		try {
+			List<InfraccionEntity> lst=this.infraccionService.getAll();
+			if (lst.isEmpty()) {
+				return super.getNotFoundRequest();
+			}
+			return super.getOKConsultaRequest(lst);
+		} catch (ServiceException e) {
+			log.error(e.getMessage());
+			return super.getErrorRequest();
 		}
-		return super.getOKConsultaRequest(lst);
 	}
-	
+
 	@GetMapping("/{id}")
-	public  ResponseEntity<ResponseREST> getUsuario(@PathVariable Long id) {
+	public  ResponseEntity<ResponseREST> getInfraccion(@PathVariable Long id) {
 		try {
 			if (id<=0) {
 				return super.getBadIdRequest();
 			}
-			Usuario usuario=this.usuarioService.findById(id);
-			if (usuario==null) {
+			InfraccionEntity infraccion=this.infraccionService.findById(id);
+			if (infraccion==null) {
 				return super.getNotFoundRequest();
 			}
-			return super.getOKConsultaRequest(usuario);
+			return super.getOKConsultaRequest(infraccion);
 		} catch (ServiceException e) {
 			log.error(e.getMessage());
 			return super.getErrorRequest();
 		}
 	}
 	
-	@GetMapping("/findByUser/{user}")
-	public  ResponseEntity<ResponseREST> getUsuario(@PathVariable String user) {
-		if (user.isEmpty()) {
-			return super.getBadIdRequest();
-		}
-		Usuario usuario=this.usuarioService.findByUsername(user);
-		if (usuario==null) {
-			return super.getNotFoundRequest();
-		}
-		return super.getOKConsultaRequest(usuario);
-	}
+	
 
+	
 	@PostMapping
-	public ResponseEntity<ResponseREST> insertar( @Validated @RequestBody Usuario usuario, BindingResult result) {
+	public ResponseEntity<ResponseREST> insertar( @Validated @RequestBody InfraccionEntity infraccion, BindingResult result) {
 		if (result.hasErrors()) {
 			return super.getBadRequest(result);
 		}
 		try {
-			usuario.setClave(passwordEncoder.encode(usuario.getClave()));
-
-			Usuario oUsuario=usuarioService.save(usuario);
-			if (oUsuario!=null) {
-				return super.getCreatedRequest(oUsuario);
+			InfraccionEntity oInfraccion=infraccionService.save(infraccion);
+			if (oInfraccion!=null) {
+				return super.getCreatedRequest(oInfraccion);
 			}
 			return super.getErrorRequest();
 		} catch (ServiceException e) {
@@ -96,23 +84,22 @@ public class UsuarioController extends GenericController {
 			return super.getErrorRequest();
 		}
 	}
-	
+
 	@PutMapping	("/{id}")
-	public ResponseEntity<ResponseREST> actualizar(@PathVariable Long id,@Validated @RequestBody Usuario usuario,
+	public ResponseEntity<ResponseREST> actualizar(@PathVariable Long id,@Validated @RequestBody InfraccionEntity infraccion,
 			BindingResult result) {
 		if (id<=0) {
 			return super.getBadIdRequest();
 		}
-		usuario.setId(id);
-		usuario.setClave(passwordEncoder.encode(usuario.getClave()));
-
+		infraccion.setId(id);
+		
 		if (result.hasErrors()) {
 			return super.getBadRequest(result);
 		}
 		try {
-			Usuario oUsuario=usuarioService.save(usuario);
-			if (oUsuario!=null) {
-				return super.getOKRegistroRequest(oUsuario);
+			InfraccionEntity oInfraccion=infraccionService.save(infraccion);
+			if (oInfraccion!=null) {
+				return super.getOKRegistroRequest(oInfraccion);
 			}
 			return super.getErrorRequest();
 		} catch (ServiceException e) {
@@ -127,9 +114,9 @@ public class UsuarioController extends GenericController {
 			return ResponseEntity.badRequest().build();
 		}
 		try {
-			Usuario oUsuario=usuarioService.delete(id);
-			if (oUsuario!=null) {
-				return super.getOKRegistroRequest(oUsuario);
+			InfraccionEntity oInfraccion=infraccionService.delete(id);
+			if (oInfraccion!=null) {
+				return super.getOKRegistroRequest(oInfraccion);
 			}
 			return super.getErrorRequest();
 		} catch (ServiceException e) {
@@ -137,7 +124,4 @@ public class UsuarioController extends GenericController {
 			return super.getErrorRequest();
 		}
 	}
-
-	
-	
 }

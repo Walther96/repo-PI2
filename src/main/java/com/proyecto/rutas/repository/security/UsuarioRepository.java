@@ -19,4 +19,6 @@ public interface UsuarioRepository extends IGenericRepository<Usuario, Long> {
 	@Query("select t from Usuario t where t.usuario=:usuario and t.estado='1'")
 	Usuario loadUserByUsername(@Param("usuario")String usuario);
 	
+	@Query("select t from Usuario t where t.estado='1'")
+	List<Usuario> findAllUsuarios();
 }

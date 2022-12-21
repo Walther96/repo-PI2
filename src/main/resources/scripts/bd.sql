@@ -90,11 +90,29 @@ ESTADO char(1),
 primary key(ID_USUARIO)
 );
 
-insert into MENU(nombre,estado) values('Prueba','1');
+insert into MENU(path,nombre,estado) values('ruta','Ruta','1');
+insert into MENU(path,nombre,estado) values('buscaruta','Buscar Ruta','1');
+insert into MENU(path,nombre,estado) values('mant-base','Mantenimiento de Bases','1');
+insert into MENU(path,nombre,estado) values('mant-destino','Mantenimiento de Destinos','1');
+insert into MENU(path,nombre,estado) values('mant-infracciones','Mantenimiento de Infracciones','1');
+insert into MENU(path,nombre,estado) values('mant-papeleta','Mantenimiento de Papeletas','1');
+insert into MENU(path,nombre,estado) values('mant-grupo-inspectores','Mantenimiento de Grupo de Inspectores','1');
+insert into MENU(path,nombre,estado) values('reporte-papeleta','Reporte de Papeletas','1');
+insert into MENU(path,nombre,estado) values('mant-usuario','Mantenimiento de Usuarios','1');
 
 insert into ROL(nombre,estado) values('admin','1');
 
-insert into Usuario(nombre,apellido,dni,email,usuario,clave,id_rol,estado) values('Fernando','Guzman','54982365',
-'fernando@gmail.com','admin','123',1,'1');
+
 
 insert into DETALLEROL(id_menu,id_rol,estado) values(1,1,'1');
+insert into DETALLEROL(id_menu,id_rol,estado) values(2,1,'1');
+insert into DETALLEROL(id_menu,id_rol,estado) values(3,1,'1');
+insert into DETALLEROL(id_menu,id_rol,estado) values(4,1,'1');
+insert into DETALLEROL(id_menu,id_rol,estado) values(5,1,'1');
+insert into DETALLEROL(id_menu,id_rol,estado) values(6,1,'1');
+insert into DETALLEROL(id_menu,id_rol,estado) values(7,1,'1');
+insert into DETALLEROL(id_menu,id_rol,estado) values(8,1,'1');
+insert into DETALLEROL(id_menu,id_rol,estado) values(9,1,'1');
+
+insert into Usuario(nombre,apellido,dni,email,usuario,clave,id_rol,estado) values('Fernando','Guzman','54982365',
+'fernando@gmail.com','admin','123',1,'1');

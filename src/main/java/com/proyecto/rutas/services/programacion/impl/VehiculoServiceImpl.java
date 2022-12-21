@@ -43,6 +43,12 @@ public class VehiculoServiceImpl implements VehiculoService {
 		return vehiculorepository.save(oVehiculo);
 	}
 
+	@Override
+	public VehiculoEntity FindXPlaca(String placa) {
+		VehiculoEntity vehiculo = this.vehiculorepository.FindXPlaca(placa);
+		return vehiculo;
+	}
+
 	
 
 }
